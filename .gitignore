@@ -24,3 +24,5 @@ pnpm-debug.log*
 *.log
 
 # OS g
+
+/generated/prisma

@@ -1,0 +1,105 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql" 
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String   @id @default(uuid())
+  name     String
+  email    String   @unique
+  password String
+  phone    String?
+  role     Role     @default(SOCIETY)
+
+  // Relations
+  kos      Kos[]      @relation("UserKos")
+  reviews  Review[]
+  books    Book[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Kos {
+  id             String          @id @default(uuid())
+  userId         String
+  name           String
+  address        String
+  pricePerMonth  Int
+  gender         Gender
+
+  // Relations
+  user       User          @relation("UserKos", fields: [userId], references: [id])
+  images     KosImage[]
+  facilities KosFacility[]
+  reviews    Review[]
+  books      Book[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model KosImage {
+  id     String @id @default(uuid())
+  kosId  String
+  file   String
+
+  kos Kos @relation(fields: [kosId], references: [id])
+}
+
+model KosFacility {
+  id      String @id @default(uuid())
+  kosId   String
+  facility String
+
+  kos Kos @relation(fields: [kosId], references: [id])
+}
+
+model Review {
+  id      String @id @default(uuid())
+  kosId   String
+  userId  String
+  comment String
+
+  kos  Kos  @relation(fields: [kosId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Book {
+  id        String @id @default(uuid())
+  kosId     String
+  userId    String
+  startDate DateTime
+  endDate   DateTime
+  status    BookStatus @default(PENDING)
+
+  kos  Kos  @relation(fields: [kosId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  OWNER
+  SOCIETY
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  ALL
+}
+
+enum BookStatus {
+  PENDING
+  ACCEPT
+  REJECT
+}
