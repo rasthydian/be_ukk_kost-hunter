@@ -21,7 +21,7 @@ const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
     const signature = process.env.JWT_SECRET || "";
     const decoded = jwt.verify(token, signature) as JwtPayload;
 
-    // simpan user yang sudah diverifikasi
+
     (req as any).user = decoded;
 
     next();

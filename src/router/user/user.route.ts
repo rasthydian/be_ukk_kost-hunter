@@ -7,8 +7,13 @@ import {
 } from "../../controller/user.controller";
 import { verifyToken, authorizeRole } from "../../middleware/authorization";
 import { validateUpdateUser } from "../../middleware/user.validation";
+import { validateLogin, validateRegister } from "../../middleware/auth.validation";
+import { loginUser, registerUser } from "../../controller/auth.controller";
 
 const router = Router();
+
+router.post("/register", validateRegister, registerUser);
+router.post("/login", validateLogin, loginUser);
 
 // route khusus admin/owner
 router.use(verifyToken, authorizeRole("OWNER"));
