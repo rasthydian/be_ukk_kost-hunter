@@ -1,83 +1,75 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
-/** Register User */
+/** ========== GET ALL USERS ========== */
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: { id: true, name: true, email: true, phone: true, role: true },
+    });
+    res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-export const registerUser = async (req: Request, res: Response) => {
-    try {
-        const { name, email, password, phone, role } = req.body;
+/** ========== GET USER BY ID ========== */
+export const getUserById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, name: true, email: true, phone: true, role: true },
+    });
 
-        const findEmail = await prisma.user.findFirst({
-            where: { email }
-        })
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-        if (findEmail) {
-            res.status(400).json({ message: "Email already exists" });
-        }
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+/** ========== UPDATE USER ========== */
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { name, email, phone, role } = req.body;
 
-        const newUser = await prisma.user.create({
-            data: {
-                name,
-                email,
-                password: hashedPassword,
-                phone,
-                role
-            }
-        })
-        res.status(201).json({
-            message: "User registered successfully",
-            data: newUser
-        })
-        return
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Internal server error" });
-    }
-}
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-/** Login User */
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: { name, email, phone, role },
+    });
 
-export const loginUser = async (req: Request, res: Response) => {
-    try {
-        const {email, name, password} = req.body;
+    res.status(200).json({
+      message: "User updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-        const user = await prisma.user.findFirst({
-            where: {email, name}
-        })
+/** ========== DELETE USER ========== */
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
 
-        if(!user){
-            res.status(400).json({ message: "User not found" });
-        }
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-        const isPasswordValid = await bcrypt.compare(password, user?.password || "");
-
-        if(!isPasswordValid){
-            res.status(400).json({ message: "Invalid password" });
-        }
-        
-        const token = jwt.sign({
-            id: user?.id,
-            email: user?.email,
-            name: user?.name,
-            role: user?.role
-        },
-        process.env.JWT_SECRET || "secret",
-        {
-            expiresIn: "1h"
-        })
-        
-        res.status(200).json({
-            message: "Login successful",
-            token
-        })
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Internal server error" });
-    }
-}
+    await prisma.user.delete({ where: { id } });
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
