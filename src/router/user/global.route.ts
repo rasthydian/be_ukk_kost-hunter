@@ -10,7 +10,7 @@ import {
 
 const router = Router();
 
-// route global (tidak perlu token)
+
 router.post("/register", validateRegister, registerUser);
 router.post("/login", validateLogin, loginUser);
 router.get("/profile/:id", getUserById);

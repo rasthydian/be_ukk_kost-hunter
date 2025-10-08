@@ -15,7 +15,7 @@ const router = Router();
 router.post("/register", validateRegister, registerUser);
 router.post("/login", validateLogin, loginUser);
 
-// route khusus admin/owner
+
 router.use(verifyToken, authorizeRole("OWNER"));
 
 router.get("/", getAllUsers);
