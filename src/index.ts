@@ -6,9 +6,13 @@ import Express from "express";
 import privateRoute from "./router/user/private.route";
 import globalRoute from "./router/user/global.route";
 import authRoute from "./router/auth.router";
+import path from "path";
 
 
 const app = Express();
+
+app.use("/uploads", Express.static(path.join(__dirname, "../upload/kost")));
+
 app.use(Express.json());
 
 app.use("/user-auth", authRoute);

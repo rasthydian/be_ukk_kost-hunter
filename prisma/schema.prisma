@@ -47,9 +47,10 @@ model Kos {
 model KosImage {
   id     String @id @default(uuid())
   kosId  String
+  url      String
   file   String
 
-  kos Kos @relation(fields: [kosId], references: [id])
+  kos Kos @relation(fields: [kosId], references: [id], onDelete: Cascade)
 }
 
 model KosFacility {
@@ -57,7 +58,7 @@ model KosFacility {
   kosId   String
   facility String
 
-  kos Kos @relation(fields: [kosId], references: [id])
+  kos Kos @relation(fields: [kosId], references: [id], onDelete: Cascade)
 }
 
 model Review {
@@ -66,7 +67,7 @@ model Review {
   userId  String
   comment String
 
-  kos  Kos  @relation(fields: [kosId], references: [id])
+  kos  Kos  @relation(fields: [kosId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
@@ -80,7 +81,7 @@ model Book {
   endDate   DateTime
   status    BookStatus @default(PENDING)
 
-  kos  Kos  @relation(fields: [kosId], references: [id])
+  kos  Kos  @relation(fields: [kosId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
